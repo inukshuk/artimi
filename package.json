@@ -1,0 +1,25 @@
+{
+  "name": "artimi",
+  "version": "1.0.0",
+  "description": "Artimi is a Transkribus API client for Node.js and the Web",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inukshuk/artimi.git"
+  },
+  "keywords": [
+    "transkribus",
+    "ocr",
+    "htr"
+  ],
+  "author": "",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/inukshuk/artimi/issues"
+  },
+  "homepage": "https://github.com/inukshuk/artimi#readme"
+}
