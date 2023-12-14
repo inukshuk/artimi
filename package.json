@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "npm test"
+    "pretest": "npx eslint src test",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/inukshuk/artimi/issues"
   },
-  "homepage": "https://github.com/inukshuk/artimi#readme"
+  "homepage": "https://github.com/inukshuk/artimi#readme",
+  "devDependencies": {
+    "eslint": "^8.55.0"
+  }
 }
