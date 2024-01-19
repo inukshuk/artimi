@@ -1,4 +1,5 @@
 import defaults from './config.js'
+import { TokenSet } from './token-set.js'
 
 export class Session {
   constructor(options) {
@@ -8,41 +9,49 @@ export class Session {
     }
   }
 
-  async details() {
-    let res = await this.request('auth/details')
-    let details = await res.json()
-    return details
-  }
-
   async login() {
     let params = new URLSearchParams
 
-    params.append('user', this.config.user)
-    params.append('pw', this.config.password)
+    params.append('grant_type', 'password')
+    params.append('username', this.config.user)
+    params.append('password', this.config.password)
+    params.append('client_id', 'processing-api-client')
 
-    let res = await this.post('auth/login', params)
-    let details = await res.json()
+    let res = await this.post('token', params)
+    this.oid = new TokenSet(await res.json())
 
-    this.id = details.sessionId
-
-    return details
+    return this
   }
 
   async logout() {
     try {
-      await this.request('auth/logout')
+      if (!this.oid.isRefreshExpired) {
+        let params = new URLSearchParams
 
+        params.append('refresh_token', this.oid.refreshToken)
+        params.append('client_id', 'processing-api-client')
+
+        await this.request('logout', params)
+      }
     } finally {
-      delete this.id
+      delete this.oid
     }
   }
 
-  async check() {
-    await this.request('auth/checkSession')
-  }
-
   async refresh() {
-    await this.post('auth/refresh')
+    if (!this.oid?.refreshToken || this.oid.isRefreshExpired)
+      return this.login()
+
+    let params = new URLSearchParams
+
+    params.append('grant_type', 'refresh_token')
+    params.append('refresh_token', this.oid.refreshToken)
+    params.append('client_id', 'processing-api-client')
+
+    let res = await this.post('token', params)
+    this.auth = this.oid.refresh(await res.json())
+
+    return this
   }
 
   async post(path, body, options) {
@@ -50,15 +59,12 @@ export class Session {
   }
 
   async request(path, { headers = {}, ...options } = {}) {
-    if (this.id)
-      headers['Cookie'] = `JSESSIONID=${this.id}`
-
     headers['User-Agent'] = this.config.userAgent
 
     if (!('Accept' in headers))
       headers['Accept'] = 'application/json'
 
-    let url = `${this.config.api}/${path}`
+    let url = `${this.config.oidc}/${path}`
     options.headers = headers
 
     let res = await fetch(url, options)

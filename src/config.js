@@ -7,7 +7,6 @@ async function readJSON(file) {
     return JSON.parse(
       await readFile(file, { encoding: 'utf-8' })
     )
-
   } catch (e) {
     if (e.code !== 'ENOENT') {
       console.warn(`failed opening ${file}: ${e.message}`)
@@ -18,7 +17,8 @@ async function readJSON(file) {
 const pkg = await readJSON(new URL('../package.json', import.meta.url))
 
 export const config = {
-  api: 'https://transkribus.eu/TrpServer/rest',
+  oidc: 'https://account.readcoop.eu/auth/realms/readcoop/protocol/openid-connect',
+  api: 'https://transkribus.eu/processing/v1',
   userAgent: `${pkg.productName || pkg.name}/${pkg.version}`
 }
 
