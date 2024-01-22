@@ -17,8 +17,9 @@ async function readJSON(file) {
 const pkg = await readJSON(new URL('../package.json', import.meta.url))
 
 export const config = {
-  oidc: 'https://account.readcoop.eu/auth/realms/readcoop/protocol/openid-connect',
-  api: 'https://transkribus.eu/processing/v1',
+  auth: 'https://account.readcoop.eu/auth/realms/readcoop/protocol/openid-connect',
+  metagrapho: 'https://transkribus.eu/processing/v1',
+  trp: 'https://transkribus.eu/TrpServer/rest',
   userAgent: `${pkg.productName || pkg.name}/${pkg.version}`
 }
 

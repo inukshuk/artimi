@@ -64,7 +64,7 @@ export class Session {
     if (!('Accept' in headers))
       headers['Accept'] = 'application/json'
 
-    let url = `${this.config.oidc}/${path}`
+    let url = `${this.config.auth}/${path}`
     options.headers = headers
 
     let res = await fetch(url, options)
