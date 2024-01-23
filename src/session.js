@@ -1,6 +1,12 @@
 import defaults from './config.js'
 import { TokenSet } from './token-set.js'
 
+function urlSearchParams(obj) {
+  return Object.entries(obj).reduce(({ params, key, value }) => (
+    params.append(key, value), params
+  ), new URLSearchParams)
+}
+
 export class Session {
   constructor(options) {
     this.config = {
@@ -10,14 +16,12 @@ export class Session {
   }
 
   async login() {
-    let params = new URLSearchParams
+    let res = await this.authRequest('token', {
+      grant_type: 'password',
+      username: this.config.user,
+      password: this.config.password
+    })
 
-    params.append('grant_type', 'password')
-    params.append('username', this.config.user)
-    params.append('password', this.config.password)
-    params.append('client_id', 'processing-api-client')
-
-    let res = await this.post('token', params)
     this.oid = new TokenSet(await res.json())
 
     return this
@@ -26,13 +30,13 @@ export class Session {
   async logout() {
     try {
       if (!this.oid.isRefreshExpired) {
-        let params = new URLSearchParams
-
-        params.append('refresh_token', this.oid.refreshToken)
-        params.append('client_id', 'processing-api-client')
-
-        await this.request('logout', params)
+        await this.authRequest('logout', {
+          refresh_token: this.oid.refreshToken
+        })
       }
+
+      return this
+
     } finally {
       delete this.oid
     }
@@ -42,31 +46,32 @@ export class Session {
     if (!this.oid?.refreshToken || this.oid.isRefreshExpired)
       return this.login()
 
-    let params = new URLSearchParams
+    let res = await this.authRequest('token', {
+      grant_type: 'refresh_token',
+      refresh_token: this.oid.refreshToken
+    })
 
-    params.append('grant_type', 'refresh_token')
-    params.append('refresh_token', this.oid.refreshToken)
-    params.append('client_id', 'processing-api-client')
-
-    let res = await this.post('token', params)
-    this.auth = this.oid.refresh(await res.json())
+    this.oid.refresh(await res.json())
 
     return this
   }
 
-  async post(path, body, options) {
-    return this.request(path, { ...options, method: 'POST', body })
-  }
-
-  async request(path, { headers = {}, ...options } = {}) {
-    headers['User-Agent'] = this.config.userAgent
-
-    if (!('Accept' in headers))
-      headers['Accept'] = 'application/json'
-
+  async authRequest(path, params, options = {}) {
     let url = `${this.config.auth}/${path}`
-    options.headers = headers
 
+    options.method = 'POST'
+
+    options.headers = {
+      'User-Agent': this.config.userAgent,
+      'Accept': 'application/json',
+      ...options.headers
+    }
+
+    options.body = urlSearchParams({
+      client_id: 'processing-api-client',
+      ...params
+    })
+    
     let res = await fetch(url, options)
 
     if (!res.ok) {
