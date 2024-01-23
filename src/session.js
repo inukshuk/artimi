@@ -42,7 +42,10 @@ export class Session {
     }
   }
 
-  async refresh() {
+  async refresh(force = false) {
+    if (!force && !this.oid?.isExpired)
+      return this
+
     if (!this.oid?.refreshToken || this.oid.isRefreshExpired)
       return this.login()
 
@@ -50,6 +53,9 @@ export class Session {
       grant_type: 'refresh_token',
       refresh_token: this.oid.refreshToken
     })
+    
+    if (!res.ok)
+      return this.login()
 
     this.oid.refresh(await res.json())
 
