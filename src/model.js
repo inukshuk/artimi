@@ -8,5 +8,11 @@ export async function fetchPublicModels() {
   })
 
   let data = await res.json()
-  return data.trpModelMetadata
+  return Array.from(data.trpModelMetadata, (md) => new Model(md))
+}
+
+export class Model {
+  constructor(data) {
+    Object.assign(this, data)
+  }
 }
