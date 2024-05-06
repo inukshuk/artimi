@@ -57,11 +57,11 @@ export class Image {
 
   async open() {
     switch (this.url?.protocol) {
-      case 'file':
+      case 'file:':
         this.buffer = await readFile(this.url, { encoding: null })
         break
-      case 'http':
-      case 'https': {
+      case 'http:':
+      case 'https:': {
         let res = await fetch(this.url)
         if (!res.ok) {
           throw new Error(`cannot open ${this.url}: ${res.status}`)
@@ -79,7 +79,7 @@ export class Image {
   validate() {
     let { buffer } = this
 
-    assert(buffer.size < (20 * 1024),
+    assert(buffer.length < (20 * 1024),
       'image buffer exceeds 20 mb')
 
     assert(isJPEG(buffer) || isPNG(buffer) || isTIFF(buffer),
