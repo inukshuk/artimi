@@ -1,11 +1,14 @@
+import { scheduler } from 'node:timers/promises'
 import defaults from './config.js'
 import { TokenSet } from './token-set.js'
+import { Process } from './process.js'
 
 function urlSearchParams(obj) {
-  return Object.entries(obj).reduce(({ params, key, value }) => (
+  return Object.entries(obj).reduce((params, [key, value]) => (
     params.append(key, value), params
   ), new URLSearchParams)
 }
+
 
 export class Session {
   constructor(options) {
@@ -43,10 +46,13 @@ export class Session {
   }
 
   async refresh(force = false) {
-    if (!force && !this.oid?.isExpired)
+    if (!this.oid)
+      return this.login()
+
+    if (!force && !this.oid.isExpired)
       return this
 
-    if (!this.oid?.refreshToken || this.oid.isRefreshExpired)
+    if (!this.oid.refreshToken || this.oid.isRefreshExpired)
       return this.login()
 
     let res = await this.authRequest('token', {
@@ -62,32 +68,86 @@ export class Session {
     return this
   }
 
-  async authRequest(path, params, options = {}) {
-    let url = `${this.config.auth}/${path}`
+  async authRequest(path, params) {
+    return this.request(`${this.config.auth}/${path}`, {
+      method: 'POST',
+      body: urlSearchParams({
+        client_id: 'processing-api-client',
+        ...params
+      })
+    }, false)
+  }
 
-    options.method = 'POST'
-
+  async request(url, options = {}, auth = true) {
     options.headers = {
       'User-Agent': this.config.userAgent,
       'Accept': 'application/json',
       ...options.headers
     }
 
-    options.body = urlSearchParams({
-      client_id: 'processing-api-client',
-      ...params
-    })
-    
+    if (auth) {
+      await this.refresh()
+      options.Authorization = `Bearer ${this.oid.accessToken}`
+    }
+
+    if (this.config.verbose) {
+      console.log(`fetching ${url} with`, options)
+    }
+
     let res = await fetch(url, options)
 
     if (!res.ok) {
-      if (this.config.verbose) {
-        console.warn(url, options)
+      let message
+
+      try {
+        message = (await res.json()).message
+      } catch {
+        message = await res.text()
       }
 
-      throw new Error(`${path} failed with ${res.status}`)
+      throw new Error(`fetching ${res.url} failed with ${res.status}: ${message}`)
     }
 
     return res
   }
+
+  async process(image, config) {
+    let url = `${this.config.metagrapho}/processes`
+    let body = JSON.stringify({ config, image })
+
+    let res = await this.request(url, { method: 'POST', body })
+    let { processId } = await res.json()
+
+    return new Process(processId)
+  }
+
+  async poll(proc) {
+    if (proc.done)
+      return proc
+
+    let url = `${this.config.metagrapho}/processes/${proc.id}`
+    
+    while (true) {
+      let res = await this.request(url)
+      proc.update(await res.json())
+
+      if (proc.done)
+        return proc
+
+      await scheduler.wait(this.config.delay)
+    }
+  }
+
+  async alto(proc) {
+    if (!proc.done)
+      await this.poll(proc)
+
+    let url = `${this.config.metagrapho}/processes/${proc.id}/alto`
+    let res = this.request(url, {
+      headers: { Accept: 'application/xml' }
+    })
+
+    return res.text()
+  }
+
 }
