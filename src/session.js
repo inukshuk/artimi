@@ -110,7 +110,10 @@ export class Session {
 
   async process(image, config) {
     let url = `${this.config.metagrapho}/processes`
-    let body = JSON.stringify({ config, image: Image.open(image) })
+    let body = JSON.stringify({
+      config,
+      image: await Image.open(image)
+    })
 
     let res = await this.request(url, {
       method: 'POST',
