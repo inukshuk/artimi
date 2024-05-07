@@ -28,7 +28,7 @@ export class Image {
   }
 
   constructor(input) {
-    if (input instanceof Buffer)
+    if (Buffer.isBuffer(input))
       this.buffer = input
     if (input instanceof URL || PROTO.test(input))
       this.url = input
