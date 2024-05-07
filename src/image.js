@@ -22,8 +22,9 @@ export class Image {
   #buffer
   #url
 
-  static async open(input) {
-    return (new Image(input)).open()
+  static async open(input, download = false) {
+    let image = (input instanceof Image) ? input : new Image(input)
+    return image.open(download)
   }
 
   constructor(input) {
@@ -55,18 +56,20 @@ export class Image {
     return this.#url
   }
 
-  async open() {
+  async open(download = download) {
     switch (this.url?.protocol) {
       case 'file:':
         this.buffer = await readFile(this.url, { encoding: null })
         break
       case 'http:':
       case 'https:': {
-        let res = await fetch(this.url)
-        if (!res.ok) {
-          throw new Error(`cannot open ${this.url}: ${res.status}`)
+        if (download) {
+          let res = await fetch(this.url)
+          if (!res.ok) {
+            throw new Error(`cannot open ${this.url}: ${res.status}`)
+          }
+          this.buffer = await res.arrayBuffer()
         }
-        this.buffer = await res.arrayBuffer()
         break
       }
       default:
