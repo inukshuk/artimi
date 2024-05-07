@@ -30,7 +30,7 @@ export class Image {
   constructor(input) {
     if (Buffer.isBuffer(input))
       this.buffer = input
-    if (input instanceof URL || PROTO.test(input))
+    else if (input instanceof URL || PROTO.test(input))
       this.url = input
     else
       this.path = input
