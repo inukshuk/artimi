@@ -1,6 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import { cwd, env } from 'node:process'
+import { env } from 'node:process'
 import pkg from '../package.json' with { type: 'json' }
 
 export const config = {
