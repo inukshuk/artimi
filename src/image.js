@@ -24,7 +24,11 @@ export class Image {
 
   static async open(input, download = false) {
     let image = (input instanceof Image) ? input : new Image(input)
-    return image.open(download)
+
+    if (!image.buffer)
+      await image.open(download)
+
+    return image
   }
 
   constructor(input) {
