@@ -1,5 +1,6 @@
 import { scheduler } from 'node:timers/promises'
 import defaults from './config.js'
+import { Image } from './image.js'
 import { TokenSet } from './token-set.js'
 import { Process } from './process.js'
 
@@ -109,7 +110,7 @@ export class Session {
 
   async process(image, config) {
     let url = `${this.config.metagrapho}/processes`
-    let body = JSON.stringify({ config, image })
+    let body = JSON.stringify({ config, image: Image.open(image) })
 
     let res = await this.request(url, {
       method: 'POST',
