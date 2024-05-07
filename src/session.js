@@ -111,9 +111,13 @@ export class Session {
     let url = `${this.config.metagrapho}/processes`
     let body = JSON.stringify({ config, image })
 
-    let res = await this.request(url, { method: 'POST', body })
-    let { processId } = await res.json()
+    let res = await this.request(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body
+    })
 
+    let { processId } = await res.json()
     return new Process(processId)
   }
 
