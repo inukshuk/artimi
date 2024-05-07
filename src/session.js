@@ -87,7 +87,7 @@ export class Session {
 
     if (auth) {
       await this.refresh()
-      options.Authorization = `Bearer ${this.oid.accessToken}`
+      options.headers.Authorization = `Bearer ${this.oid.accessToken}`
     }
 
     if (this.config.verbose) {
