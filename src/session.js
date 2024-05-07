@@ -143,7 +143,7 @@ export class Session {
       await this.poll(proc)
 
     let url = `${this.config.metagrapho}/processes/${proc.id}/alto`
-    let res = this.request(url, {
+    let res = await this.request(url, {
       headers: { Accept: 'application/xml' }
     })
 
