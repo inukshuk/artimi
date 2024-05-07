@@ -21,6 +21,6 @@ export class TokenSet {
   }
 
   checkExpiration(value) {
-    return (Number(value) - (Date.now() - this.timestamp) * 1000) > 0
+    return (Number(value) - (Date.now() - this.timestamp) / 1000) > 0
   }
 }
