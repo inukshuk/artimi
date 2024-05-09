@@ -1,4 +1,5 @@
 export class TokenSet {
+  threshold = 5
 
   constructor(values) {
     this.refresh(values)
@@ -20,7 +21,11 @@ export class TokenSet {
     return !this.checkExpiration(this.refresh_expires_in)
   }
 
+  get age() {
+    return (Date.now() - this.timestamp) / 1000
+  }
+
   checkExpiration(value) {
-    return (Number(value) - (Date.now() - this.timestamp) / 1000) > 0
+    return (Number(value) - this.age - this.threshold) > 0
   }
 }
