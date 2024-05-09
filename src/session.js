@@ -26,45 +26,45 @@ export class Session {
       password: this.config.password
     })
 
-    this.oid = new TokenSet(await res.json())
+    this.tokenSet = new TokenSet(await res.json())
 
     return this
   }
 
   async logout() {
     try {
-      if (!this.oid.isRefreshExpired) {
+      if (!this.tokenSet.isRefreshExpired) {
         await this.authRequest('logout', {
-          refresh_token: this.oid.refreshToken
+          refresh_token: this.tokenSet.refreshToken
         })
       }
 
       return this
 
     } finally {
-      delete this.oid
+      delete this.tokenSet
     }
   }
 
   async refresh(force = false) {
-    if (!this.oid)
+    if (!this.tokenSet)
       return this.login()
 
-    if (!force && !this.oid.isExpired)
+    if (!force && !this.tokenSet.isExpired)
       return this
 
-    if (!this.oid.refreshToken || this.oid.isRefreshExpired)
+    if (!this.tokenSet.refreshToken || this.tokenSet.isRefreshExpired)
       return this.login()
 
     let res = await this.authRequest('token', {
       grant_type: 'refresh_token',
-      refresh_token: this.oid.refreshToken
+      refresh_token: this.tokenSet.refreshToken
     })
     
     if (!res.ok)
       return this.login()
 
-    this.oid.refresh(await res.json())
+    this.tokenSet.refresh(await res.json())
 
     return this
   }
@@ -88,7 +88,7 @@ export class Session {
 
     if (auth) {
       await this.refresh()
-      options.headers.Authorization = `Bearer ${this.oid.accessToken}`
+      options.headers.Authorization = `Bearer ${this.tokenSet.accessToken}`
     }
 
     if (this.config.verbose) {
