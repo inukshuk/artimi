@@ -1,6 +1,6 @@
 import defaults from './config.js'
 
-export async function fetchPublicModels() {
+export async function fetchPublicModels () {
   let res = await fetch(`${defaults.trp}/models/text`, {
     headers: {
       Accept: 'application/json'
@@ -12,7 +12,7 @@ export async function fetchPublicModels() {
 }
 
 export class Model {
-  constructor(data) {
+  constructor (data) {
     Object.assign(this, data)
   }
 }

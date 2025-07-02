@@ -1,35 +1,34 @@
 import { EventEmitter } from 'node:events'
 
-
 const CREATED = 'CREATED'
 const FAILED = 'FAILED'
-const FINISHED ='FINISHED'
+const FINISHED = 'FINISHED'
 // const RUNNING = 'RUNNING'
 // const WAITING = 'WAITING'
 
 export class Process extends EventEmitter {
   #status
 
-  constructor(id, status = CREATED) {
+  constructor (id, status = CREATED) {
     super({ captureRejections: true })
 
     this.id = id
     this.status = status
   }
 
-  get status() {
+  get status () {
     return this.#status
   }
 
-  set status(status) {
+  set status (status) {
     this.#status = status
   }
 
-  get done() {
+  get done () {
     return this.#status === FINISHED || this.#status === FAILED
   }
 
-  update({ status, content }) {
+  update ({ status, content }) {
     let prev = this.#status
     this.status = status
 
@@ -49,7 +48,7 @@ export class Process extends EventEmitter {
     }
   }
 
-  ready() {
+  ready () {
     return new Promise((resolve, reject) => {
       if (this.done) {
         resolve(this)

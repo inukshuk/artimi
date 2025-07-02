@@ -1,22 +1,22 @@
-import js from '@eslint/js'
-import globals from 'globals'
+import neostandard from 'neostandard'
 
 export default [
-  js.configs.recommended,
+  ...neostandard({ noJsx: true }),
   {
     ignores: [
       'src/config.js'
     ]
   },
   {
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      }
-    },
     rules: {
-      'quotes': [2, 'single', 'avoid-escape'],
-      'wrap-regex': 2,
+      'accessor-pairs': 0,
+      'curly': 0,
+      'no-sequences': [2, { allowInParentheses: true }],
+      'no-var': 0,
+      'prefer-const': 0,
+      '@stylistic/new-parens': 0,
+      '@stylistic/generator-star-spacing': [2, { before: true }],
+      '@stylistic/quote-props': 0
     }
   }
 ]

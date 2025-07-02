@@ -17,12 +17,11 @@ const isTIFF = (buffer) =>
 const check = (buffer, bytes, offset = 0) =>
   buffer.slice(offset, offset + bytes.length).compare(Buffer.from(bytes)) === 0
 
-
 export class Image {
   #buffer
   #url
 
-  static async open(input, download = false) {
+  static async open (input, download = false) {
     let image = (input instanceof Image) ? input : new Image(input)
 
     if (!image.buffer)
@@ -31,7 +30,7 @@ export class Image {
     return image
   }
 
-  constructor(input) {
+  constructor (input) {
     if (Buffer.isBuffer(input))
       this.buffer = input
     else if (input instanceof URL || PROTO.test(input))
@@ -40,27 +39,27 @@ export class Image {
       this.path = input
   }
 
-  set buffer(buffer) {
+  set buffer (buffer) {
     this.#buffer = Buffer.from(buffer)
   }
 
-  get buffer() {
+  get buffer () {
     return this.#buffer
   }
 
-  set path(path) {
+  set path (path) {
     this.#url = pathToFileURL(path)
   }
 
-  set url(url) {
+  set url (url) {
     this.#url = new URL(url)
   }
 
-  get url() {
+  get url () {
     return this.#url
   }
 
-  async open(download = download) {
+  async open (download = false) {
     switch (this.url?.protocol) {
       case 'file:':
         this.buffer = await readFile(this.url, { encoding: null })
@@ -83,7 +82,7 @@ export class Image {
     return this
   }
 
-  validate() {
+  validate () {
     let { buffer } = this
 
     assert(buffer.length < (20 * 1024),
@@ -95,7 +94,7 @@ export class Image {
     return this
   }
 
-  toJSON() {
+  toJSON () {
     if (this.buffer != null) {
       return {
         base64: this.buffer.toString('base64')

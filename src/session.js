@@ -4,22 +4,21 @@ import { Image } from './image.js'
 import { TokenSet } from './token-set.js'
 import { Process } from './process.js'
 
-function urlSearchParams(obj) {
+function urlSearchParams (obj) {
   return Object.entries(obj).reduce((params, [key, value]) => (
-    params.append(key, value), params
+    (params.append(key, value), params)
   ), new URLSearchParams)
 }
 
-
 export class Session {
-  constructor(options) {
+  constructor (options) {
     this.config = {
       ...defaults,
       ...options
     }
   }
 
-  async login() {
+  async login () {
     let res = await this.authRequest('token', {
       grant_type: 'password',
       username: this.config.user,
@@ -31,7 +30,7 @@ export class Session {
     return this
   }
 
-  async logout() {
+  async logout () {
     try {
       if (!this.tokenSet.isRefreshExpired) {
         await this.authRequest('logout', {
@@ -40,13 +39,12 @@ export class Session {
       }
 
       return this
-
     } finally {
       delete this.tokenSet
     }
   }
 
-  async refresh(force = false) {
+  async refresh (force = false) {
     if (!this.tokenSet)
       return this.login()
 
@@ -60,7 +58,7 @@ export class Session {
       grant_type: 'refresh_token',
       refresh_token: this.tokenSet.refreshToken
     })
-    
+
     if (!res.ok)
       return this.login()
 
@@ -69,7 +67,7 @@ export class Session {
     return this
   }
 
-  async authRequest(path, params) {
+  async authRequest (path, params) {
     return this.request(`${this.config.auth}/${path}`, {
       method: 'POST',
       body: urlSearchParams({
@@ -79,10 +77,10 @@ export class Session {
     }, false)
   }
 
-  async request(url, options = {}, auth = true) {
+  async request (url, options = {}, auth = true) {
     options.headers = {
       'User-Agent': this.config.userAgent,
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...options.headers
     }
 
@@ -99,8 +97,9 @@ export class Session {
 
     if (!res.ok) {
       let type = res.headers.get('Content-Type')
-      let message = (type === 'application/json') ?
-        (await res.json()).message : await res.text()
+      let message = (type === 'application/json')
+        ? (await res.json()).message
+        : await res.text()
 
       throw new Error(`fetching ${res.url} failed with ${res.status}: ${message}`)
     }
@@ -108,7 +107,7 @@ export class Session {
     return res
   }
 
-  async process(image, config) {
+  async process (image, config) {
     let url = `${this.config.metagrapho}/processes`
     let body = JSON.stringify({
       config,
@@ -125,12 +124,12 @@ export class Session {
     return new Process(processId)
   }
 
-  async poll(proc) {
+  async poll (proc) {
     if (proc.done)
       return proc
 
     let url = `${this.config.metagrapho}/processes/${proc.id}`
-    
+
     while (true) {
       let res = await this.request(url)
       proc.update(await res.json())
@@ -142,7 +141,7 @@ export class Session {
     }
   }
 
-  async alto(proc) {
+  async alto (proc) {
     if (!proc.done)
       await this.poll(proc)
 
@@ -153,5 +152,4 @@ export class Session {
 
     return res.text()
   }
-
 }

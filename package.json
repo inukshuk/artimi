@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "pretest": "npx eslint src test",
+    "pretest": "npx eslint src test ./*.js",
     "test": "node --test --experimental-test-coverage --test-reporter=spec"
   },
   "repository": {
@@ -25,6 +25,6 @@
   "homepage": "https://github.com/inukshuk/artimi#readme",
   "devDependencies": {
     "eslint": "^9.2.0",
-    "globals": "^15.1.0"
+    "neostandard": "^0.12.1"
   }
 }
