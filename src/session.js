@@ -98,7 +98,7 @@ export class Session {
     if (!res.ok) {
       let type = res.headers.get('Content-Type')
       let message = (type === 'application/json')
-        ? (await res.json()).message
+        ? await res.json()
         : await res.text()
 
       throw new Error(`fetching ${res.url} failed with ${res.status}: ${message}`)
