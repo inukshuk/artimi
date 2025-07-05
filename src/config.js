@@ -12,6 +12,6 @@ export const config = {
 if (env.TRANSKRIBUS_USER)
   config.user = env.TRANSKRIBUS_USER
 if (env.TRANSKRIBUS_PASSWORD)
-  config.user = env.TRANSKRIBUS_PASSWORD
+  config.password = env.TRANSKRIBUS_PASSWORD
 
 export default config
