@@ -123,7 +123,7 @@ export class Session {
     })
 
     let { processId } = await res.json()
-    this.logger?.info(`Submitted transcription request #${processId}`)
+    this.logger?.info(`Submitted process#${processId}`)
 
     return new Process(processId)
   }
@@ -134,12 +134,13 @@ export class Session {
 
     let numRetries = 0
     let url = `${this.config.metagrapho}/processes/${proc.id}`
-    this.logger?.info(`Waiting for request #${proc.id} ...`)
+    this.logger?.info(`Waiting for process#${proc.id} ...`)
 
     while (!signal?.aborted) {
       try {
         let res = await this.request(url, { signal })
         proc.update(await res.json())
+        this.logger?.info(`Process#${proc.id} status: ${proc.status}`)
       } catch (err) {
         if (signal?.aborted || ++numRetries > maxRetries) {
           throw err
@@ -157,9 +158,9 @@ export class Session {
     }
   }
 
-  async alto (proc) {
+  async alto (proc, ...args) {
     if (!proc.done)
-      await this.poll(proc)
+      await this.poll(proc, ...args)
 
     let url = `${this.config.metagrapho}/processes/${proc.id}/alto`
     let res = await this.request(url, {
