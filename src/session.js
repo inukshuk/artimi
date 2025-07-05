@@ -123,18 +123,28 @@ export class Session {
     })
 
     let { processId } = await res.json()
+    this.logger?.info(`Submitted transcription request #${processId}`)
+
     return new Process(processId)
   }
 
-  async poll (proc) {
+  async poll (proc, { maxRetries = 0 } = {}) {
     if (proc.done)
       return proc
 
+    let numRetries = 0
     let url = `${this.config.metagrapho}/processes/${proc.id}`
+    this.logger?.info(`Waiting for request #${proc.id} ...`)
 
     while (true) {
-      let res = await this.request(url)
-      proc.update(await res.json())
+      try {
+        let res = await this.request(url)
+        proc.update(await res.json())
+      } catch (err) {
+        if (++numRetries > maxRetries) {
+          throw err
+        }
+      }
 
       if (proc.done)
         return proc
