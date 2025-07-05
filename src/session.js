@@ -11,8 +11,8 @@ function urlSearchParams (obj) {
 }
 
 export class Session {
-  constructor ({ logger, ...options }) {
-    this.logger = logger
+  constructor ({ logger, verbose, ...options }) {
+    this.logger = logger || verbose ? console : undefined
     this.config = {
       ...defaults,
       ...options
