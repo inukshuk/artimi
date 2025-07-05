@@ -138,10 +138,10 @@ export class Session {
 
     while (!signal?.aborted) {
       try {
-        let res = await this.request(url)
+        let res = await this.request(url, { signal })
         proc.update(await res.json())
       } catch (err) {
-        if (++numRetries > maxRetries) {
+        if (signal?.aborted || ++numRetries > maxRetries) {
           throw err
         }
       }
