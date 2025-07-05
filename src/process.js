@@ -28,6 +28,10 @@ export class Process extends EventEmitter {
     return this.#status === FINISHED || this.#status === FAILED
   }
 
+  get failed () {
+    return this.#status === FAILED
+  }
+
   update ({ status, content }) {
     let prev = this.#status
     this.status = status
