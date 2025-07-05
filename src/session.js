@@ -102,12 +102,8 @@ export class Session {
     let res = await fetch(url, options)
 
     if (!res.ok) {
-      let type = res.headers.get('Content-Type')
-      let message = (type === 'application/json')
-        ? await res.json()
-        : await res.text()
-
-      throw new Error(`fetching ${res.url} failed with ${res.status}: ${message}`)
+      this.logger?.error({ res }, `Request failed with ${res.status}`)
+      throw new Error(`Request failed with ${res.status}`, { cause: res })
     }
 
     return res
