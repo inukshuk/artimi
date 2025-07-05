@@ -11,7 +11,8 @@ function urlSearchParams (obj) {
 }
 
 export class Session {
-  constructor (options) {
+  constructor ({ logger, ...options }) {
+    this.logger = logger
     this.config = {
       ...defaults,
       ...options
@@ -19,6 +20,9 @@ export class Session {
   }
 
   async login () {
+    this.logger?.info(
+      `Logging into Transkribus as ${this.config.user}...`)
+
     let res = await this.authRequest('token', {
       grant_type: 'password',
       username: this.config.user,
@@ -33,6 +37,7 @@ export class Session {
   async logout () {
     try {
       if (this.tokenSet && !this.tokenSet.isRefreshExpired) {
+        this.logger?.info('Logging out from Transkribus ...')
         await this.authRequest('logout', {
           refresh_token: this.tokenSet.refreshToken
         })
@@ -54,6 +59,7 @@ export class Session {
     if (!this.tokenSet.refreshToken || this.tokenSet.isRefreshExpired)
       return this.login()
 
+    this.logger?.info('Requesting new refresh token ...')
     let res = await this.authRequest('token', {
       grant_type: 'refresh_token',
       refresh_token: this.tokenSet.refreshToken
@@ -89,9 +95,9 @@ export class Session {
       options.headers.Authorization = `Bearer ${this.tokenSet.accessToken}`
     }
 
-    if (this.config.verbose) {
-      console.log(`fetching ${url} with`, options)
-    }
+    this.logger?.debug({
+      req: { url, ...options }
+    }, 'Outgoing request')
 
     let res = await fetch(url, options)
 
