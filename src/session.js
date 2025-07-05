@@ -32,7 +32,7 @@ export class Session {
 
   async logout () {
     try {
-      if (!this.tokenSet.isRefreshExpired) {
+      if (this.tokenSet && !this.tokenSet.isRefreshExpired) {
         await this.authRequest('logout', {
           refresh_token: this.tokenSet.refreshToken
         })
