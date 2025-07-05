@@ -128,7 +128,7 @@ export class Session {
     return new Process(processId)
   }
 
-  async poll (proc, { maxRetries = 0 } = {}) {
+  async poll (proc, { maxRetries = 0, signal } = {}) {
     if (proc.done)
       return proc
 
@@ -136,7 +136,7 @@ export class Session {
     let url = `${this.config.metagrapho}/processes/${proc.id}`
     this.logger?.info(`Waiting for request #${proc.id} ...`)
 
-    while (true) {
+    while (!signal?.aborted) {
       try {
         let res = await this.request(url)
         proc.update(await res.json())
@@ -149,7 +149,11 @@ export class Session {
       if (proc.done)
         return proc
 
-      await scheduler.wait(this.config.delay)
+      await new Promise(resolve => {
+        scheduler
+          .wait(this.config.delay, { signal })
+          .then(resolve, resolve)
+      })
     }
   }
 
