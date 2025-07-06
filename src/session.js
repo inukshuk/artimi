@@ -140,7 +140,7 @@ export class Session {
     return proc
   }
 
-  async poll (proc, { maxRetries = 0, signal } = {}) {
+  async poll (proc, { interval, maxRetries = 0, signal } = {}) {
     let numRetries = 0
     this.logger?.info(`Waiting for process#${proc.id} ...`)
 
@@ -159,7 +159,7 @@ export class Session {
 
       await new Promise(resolve => {
         scheduler
-          .wait(this.config.delay, { signal })
+          .wait(interval || this.config.delay, { signal })
           .then(resolve, resolve)
       })
     }
