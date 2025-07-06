@@ -128,27 +128,34 @@ export class Session {
     return new Process(processId)
   }
 
-  async poll (proc, { maxRetries = 0, signal } = {}) {
-    if (proc.done)
-      return proc
+  async update (proc, { signal } = {}) {
+    if (!(proc instanceof Process))
+      proc = new Process(proc)
 
-    let numRetries = 0
     let url = `${this.config.metagrapho}/processes/${proc.id}`
+    let res = await this.request(url, { signal })
+    proc.update(await res.json())
+    this.logger?.info(`Updated process#${proc.id} status: ${proc.status}`)
+
+    return proc
+  }
+
+  async poll (proc, { maxRetries = 0, signal } = {}) {
+    let numRetries = 0
     this.logger?.info(`Waiting for process#${proc.id} ...`)
 
-    while (!signal?.aborted) {
+    while (!(proc.done || signal?.aborted)) {
       try {
-        let res = await this.request(url, { signal })
-        proc.update(await res.json())
-        this.logger?.info(`Process#${proc.id} status: ${proc.status}`)
+        await this.update(proc, { signal })
+        numRetries = 0
       } catch (err) {
-        if (signal?.aborted || ++numRetries > maxRetries) {
+        if (signal?.aborted || (++numRetries > maxRetries)) {
           throw err
         }
       }
 
       if (proc.done)
-        return proc
+        break
 
       await new Promise(resolve => {
         scheduler
@@ -156,6 +163,8 @@ export class Session {
           .then(resolve, resolve)
       })
     }
+
+    return proc
   }
 
   async alto (proc, ...args) {
