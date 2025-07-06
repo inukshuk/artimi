@@ -20,8 +20,9 @@ export class Session {
   }
 
   async login () {
-    this.logger?.info(
-      `Logging into Transkribus as ${this.config.user}...`)
+    this.logger?.info({
+      user: this.config.user
+    }, 'Logging into Transkribus...')
 
     let res = await this.authRequest('token', {
       grant_type: 'password',
@@ -37,7 +38,9 @@ export class Session {
   async logout () {
     try {
       if (this.tokenSet && !this.tokenSet.isRefreshExpired) {
-        this.logger?.info('Logging out from Transkribus ...')
+        this.logger?.debug({
+          user: this.config.user
+        }, 'Logging out from Transkribus ...')
         await this.authRequest('logout', {
           refresh_token: this.tokenSet.refreshToken
         })
@@ -95,7 +98,7 @@ export class Session {
       options.headers.Authorization = `Bearer ${this.tokenSet.accessToken}`
     }
 
-    this.logger?.debug({
+    this.logger?.trace({
       req: { url, ...options }
     }, 'Outgoing request')
 
