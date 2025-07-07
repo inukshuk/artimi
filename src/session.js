@@ -40,7 +40,7 @@ export class Session {
       if (this.tokenSet && !this.tokenSet.isRefreshExpired) {
         this.logger?.debug({
           user: this.config.user
-        }, 'Logging out from Transkribus ...')
+        }, 'Logging out from Transkribus...')
         await this.authRequest('logout', {
           refresh_token: this.tokenSet.refreshToken
         })
@@ -62,7 +62,7 @@ export class Session {
     if (!this.tokenSet.refreshToken || this.tokenSet.isRefreshExpired)
       return this.login()
 
-    this.logger?.info('Requesting new refresh token ...')
+    this.logger?.info('Requesting new refresh token...')
     let res = await this.authRequest('token', {
       grant_type: 'refresh_token',
       refresh_token: this.tokenSet.refreshToken
@@ -145,7 +145,7 @@ export class Session {
 
   async poll (proc, { interval, maxRetries = 0, signal } = {}) {
     let numRetries = 0
-    this.logger?.info(`Waiting for process#${proc.id} ...`)
+    this.logger?.info(`Waiting for process#${proc.id}...`)
 
     while (!(proc.done || signal?.aborted)) {
       try {
