@@ -12,11 +12,12 @@ function urlSearchParams (obj) {
 
 export class Session {
   constructor ({ logger, verbose, ...options }) {
-    this.logger = logger || (verbose ? console : undefined)
     this.config = {
       ...defaults,
       ...options
     }
+    this.logger = logger || (verbose ? console : undefined)
+    this.rateLimited = Object.create({})
   }
 
   async login () {
@@ -98,6 +99,15 @@ export class Session {
       options.headers.Authorization = `Bearer ${this.tokenSet.accessToken}`
     }
 
+    if (!(url instanceof URL)) {
+      url = new URL(url)
+    }
+
+    let delay = this.getRateLimit(url.origin)
+    if (delay) {
+      await scheduler.wait(delay, { signal: options.signal })
+    }
+
     this.logger?.trace({
       req: { url, ...options }
     }, 'Outgoing request')
@@ -105,11 +115,36 @@ export class Session {
     let res = await fetch(url, options)
 
     if (!res.ok) {
+      if (res.status === 429) {
+        this.rateLimited(url.origin, Number(res.headers.get('retry-after')) || 60)
+      }
+
       this.logger?.error({ res }, `Request failed with ${res.status}`)
       throw new Error(`Request failed with ${res.status}`, { cause: res })
     }
 
     return res
+  }
+
+  rateLimit (origin, retryAfter) {
+    let until = Date.now() + (retryAfter * 1000)
+    this.rateLimited[origin] = until
+
+    this.logger?.warn({
+      origin,
+      until
+    }, `Too many requests. ${origin} is rate limited.`)
+  }
+
+  getRateLimit (origin) {
+    if (origin in this.rateLimited) {
+      let delay = this.rateLimited[origin] - Date.now()
+      if (delay > 0) {
+        return delay
+      }
+      delete this.rateLimited[origin]
+    }
+    return null
   }
 
   async process (image, config) {
