@@ -3,7 +3,8 @@ import pkg from '../package.json' with { type: 'json' }
 
 export const config = {
   auth: 'https://account.readcoop.eu/auth/realms/readcoop/protocol/openid-connect',
-  delay: 10000,
+  interval: 10000,
+  maxRetries: 0,
   metagrapho: 'https://transkribus.eu/processing/v1',
   trp: 'https://transkribus.eu/TrpServer/rest',
   userAgent: `${pkg.productName || pkg.name}/${pkg.version}`
