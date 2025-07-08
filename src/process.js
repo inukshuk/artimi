@@ -53,11 +53,11 @@ export class Process extends EventEmitter {
   }
 
   ready () {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (this.done) {
         resolve(this)
       } else {
-        this.on('error', reject)
+        this.on('error', () => { resolve(this) })
         this.on('done', () => { resolve(this) })
       }
     })
