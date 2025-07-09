@@ -18,6 +18,7 @@ export class Session {
     }
     this.logger = logger || (verbose ? console : undefined)
     this.rateLimited = Object.create({})
+    this.pending = new Set()
   }
 
   async login () {
@@ -187,6 +188,7 @@ export class Session {
     this.logger?.info(`Waiting for process#${proc.id}...`)
 
     while (!(proc.done || signal?.aborted)) {
+      let started = Date.now()
       try {
         await this.update(proc, { signal })
         numRetries = 0
@@ -199,11 +201,16 @@ export class Session {
       if (proc.done)
         break
 
-      await new Promise(resolve => {
-        scheduler
-          .wait(interval, { signal })
-          .then(resolve, resolve)
-      })
+      let duration = Date.now() - started
+      let delta = interval - duration
+
+      if (delta > 15) {
+        await new Promise(resolve => {
+          scheduler
+            .wait(interval, { signal })
+            .then(resolve, resolve)
+        })
+      }
     }
 
     return proc
