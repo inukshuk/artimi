@@ -1,7 +1,7 @@
-import defaults from './config.js'
+import config from './config.js'
 
 export async function fetchPublicModels () {
-  let res = await fetch(`${defaults.trp}/models/text`, {
+  let res = await config.fetch(`${config.trp}/models/text`, {
     headers: {
       Accept: 'application/json'
     }

@@ -2,6 +2,7 @@ import assert from 'node:assert'
 import { Buffer } from 'node:buffer'
 import { readFile } from 'node:fs/promises'
 import { URL, pathToFileURL } from 'node:url'
+import config from './config.js'
 
 const PROTO = /^[a-z]+:\/\//i
 
@@ -67,7 +68,7 @@ export class Image {
       case 'http:':
       case 'https:': {
         if (download) {
-          let res = await fetch(this.url)
+          let res = await config.fetch(this.url)
           if (!res.ok) {
             throw new Error(`cannot open ${this.url}: ${res.status}`)
           }

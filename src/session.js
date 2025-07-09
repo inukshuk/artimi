@@ -112,7 +112,7 @@ export class Session {
       req: { url, ...options }
     }, 'Outgoing request')
 
-    let res = await fetch(url, options)
+    let res = await this.config.fetch(url, options)
 
     if (!res.ok) {
       if (res.status === 429) {
