@@ -183,6 +183,9 @@ export class Session {
     maxRetries = this.config.maxRetries,
     signal
   } = {}) {
+    if (!(proc instanceof Process))
+      proc = new Process(proc)
+
     let numRetries = 0
     this.logger?.info(`Waiting for process#${proc.id}...`)
 
