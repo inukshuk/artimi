@@ -6,6 +6,7 @@ export const config = {
   fetch,
   interval: 10000,
   maxRetries: 0,
+  retryAfter: 60000,
   metagrapho: 'https://transkribus.eu/processing/v1',
   trp: 'https://transkribus.eu/TrpServer/rest',
   userAgent: `${pkg.productName || pkg.name}/${pkg.version}`

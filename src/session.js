@@ -103,20 +103,19 @@ export class Session {
       url = new URL(url)
     }
 
-    let delay = this.getRateLimit(url.origin)
-    if (delay) {
-      await scheduler.wait(delay, { signal: options.signal })
+    let until = this.getRateLimit(url.origin)
+    if (until) {
+      await scheduler.wait(until, { signal: options.signal })
     }
 
-    this.logger?.trace({
-      req: { url, ...options }
-    }, 'Outgoing request')
-
+    this.logger?.trace({ req: { url, ...options } }, 'Outgoing request')
     let res = await this.config.fetch(url, options)
 
     if (!res.ok) {
       if (res.status === 429) {
-        this.rateLimited(url.origin, Number(res.headers.get('retry-after')) || 60)
+        this.rateLimited(
+          url.origin,
+          Number(res.headers.get('retry-after')) * 1000)
       }
 
       this.logger?.error({ res }, `Request failed with ${res.status}`)
@@ -127,20 +126,18 @@ export class Session {
   }
 
   rateLimit (origin, retryAfter) {
-    let until = Date.now() + (retryAfter * 1000)
+    let until = Date.now() + (retryAfter || this.config.retryAfter)
     this.rateLimited[origin] = until
 
-    this.logger?.warn({
-      origin,
-      until
-    }, `Too many requests. ${origin} is rate limited.`)
+    this.logger?.warn(
+      `Too many requests. Rate-limiting ${origin} until ${new Date(until)}.`)
   }
 
   getRateLimit (origin) {
     if (origin in this.rateLimited) {
-      let delay = this.rateLimited[origin] - Date.now()
-      if (delay > 0) {
-        return delay
+      let delta = this.rateLimited[origin] - Date.now()
+      if (delta > 0) {
+        return delta
       }
       delete this.rateLimited[origin]
     }
