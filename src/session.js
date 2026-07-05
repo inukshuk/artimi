@@ -1,5 +1,6 @@
 import { scheduler } from 'node:timers/promises'
 import defaults from './config.js'
+import { HttpError } from './error.js'
 import { Image } from './image.js'
 import { TokenSet } from './token-set.js'
 import { Process } from './process.js'
@@ -119,8 +120,13 @@ export class Session {
           Number(res.headers.get('retry-after')) * 1000)
       }
 
-      this.logger?.error({ res }, `Request failed with ${res.status}`)
-      throw new Error(`Request failed with ${res.status}`, { cause: res })
+      let err = await HttpError.from(res, {
+        method: options.method || 'GET',
+        url: url.href
+      })
+
+      this.logger?.error({ err }, err.message)
+      throw err
     }
 
     return res
