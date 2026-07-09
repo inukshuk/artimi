@@ -115,7 +115,7 @@ export class Session {
 
     if (!res.ok) {
       if (res.status === 429) {
-        this.rateLimited(
+        this.rateLimit(
           url.origin,
           Number(res.headers.get('retry-after')) * 1000)
       }
@@ -213,7 +213,7 @@ export class Session {
       if (delta > 15) {
         await new Promise(resolve => {
           scheduler
-            .wait(interval, { signal })
+            .wait(delta, { signal })
             .then(resolve, resolve)
         })
       }
