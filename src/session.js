@@ -199,6 +199,8 @@ export class Session {
         await this.update(proc, { signal })
         numRetries = 0
       } catch (err) {
+        if (proc.done)
+          break
         if (signal?.aborted || (++numRetries > maxRetries)) {
           throw err
         }
