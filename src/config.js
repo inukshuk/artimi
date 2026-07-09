@@ -8,7 +8,7 @@ export const config = {
   maxRetries: 0,
   retryAfter: 60000,
   metagrapho: 'https://transkribus.eu/processing/v1',
-  trp: 'https://transkribus.eu/TrpServer/rest',
+  models: 'https://www.transkribus.org/api/models',
   userAgent: `${pkg.productName || pkg.name}/${pkg.version}`
 }
 
