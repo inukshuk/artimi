@@ -86,7 +86,7 @@ export class Image {
   validate () {
     let { buffer } = this
 
-    assert(buffer.length < (20 * 1024),
+    assert(buffer.length < (20 * 1024 * 1024),
       'image buffer exceeds 20 mb')
 
     assert(isJPEG(buffer) || isPNG(buffer) || isTIFF(buffer),
