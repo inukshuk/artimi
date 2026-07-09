@@ -12,9 +12,9 @@
     "./config": "./src/config.js"
   },
   "scripts": {
-    "pretest": "npx eslint src test ./*.js",
-    "test": "node --test --experimental-test-coverage --test-reporter=spec"
-  },
+    "lint": "npx eslint",
+    "test": "node --test --experimental-test-coverage"
+  },    
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inukshuk/artimi.git"
