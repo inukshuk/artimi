@@ -2,8 +2,12 @@
   "name": "artimi",
   "version": "1.0.0",
   "description": "Artimi is a Transkribus API client for Node.js and the Web",
-  "main": "src/index.js",
+  "main": "./src/index.js",
   "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./config": "./src/config.js"
+  },
   "scripts": {
     "pretest": "npx eslint src test ./*.js",
     "test": "node --test --experimental-test-coverage --test-reporter=spec"
