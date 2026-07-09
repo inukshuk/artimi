@@ -25,6 +25,6 @@
   "homepage": "https://github.com/inukshuk/artimi#readme",
   "devDependencies": {
     "eslint": "^9.2.0",
-    "neostandard": "^0.12.1"
+    "neostandard": "^0.13.0"
   }
 }
