@@ -4,6 +4,9 @@
   "description": "Artimi is a Transkribus API client for Node.js and the Web",
   "main": "./src/index.js",
   "type": "module",
+  "files": [
+    "src"
+  ],
   "exports": {
     ".": "./src/index.js",
     "./config": "./src/config.js"
